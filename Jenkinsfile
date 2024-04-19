@@ -1,51 +1,41 @@
 pipeline {
-    agent {
-        label 'ansible-master'
-    }
-
-    tools {
-        git 'Default'
-    }
+    agent any
 
     stages {
-        stage('Echo') {
+        stage('Checkout') {
             steps {
-                sh "chmod -R 755 ${env.WORKSPACE}"
+                checkout scm
             }
         }
-
-        stage('Clone Repository') {
-            steps {
-                script {
-                    //Specify the target directory
-                    def targetDir = "${env.WORKSPACE}"
-                    //Clone the repo into the specified directory
-                    dir(targetDir) {
-                        git branch: "main", url: "https://github.com/ctoweh/flask_web_app.git"
-                    }
-                }
+        stage('Deploy') {
+            agent { 
+                label 'ansible-master' 
             }
-        }
-
-        stage('Deploy with Playbook') {
             steps {
-                //Execute ansible playbook for deployment
-                sh "cd ${env.WORKSPACE}/ && ansible-playbook install-flask.yml -i hosts.ini"
+                echo 'Deploy'
+                ansiblePlaybook(
+                    playbook: '01.install-flask.yml',
+                    inventory: 'hosts.ini'
+                )
             }
         }
     }
-
     post {
         success {
-            mail to: "towehcorina@gmail.com",
-            subject: "FlaskWebApp Succesful",
-            body: "Check console output for details"
+            script {
+                // Send email for successful deploy
+                mail to: 'towehcorina@gmail.com, devopsclass0124@gmail.com',
+                subject: "Deploy Successful - ${currentBuild.fullDisplayName}",
+                body: "The deploy was successful.\n\nCheck console output at ${BUILD_URL}"
+            }
         }
-
-        failure { 
-            mail to: "towehcorina@gmail.com",
-            subject: "FlaskWebApp Failed",
-            body: "Check console output for details"
+        failure {
+            script {
+                // Send email for failed deploy
+                mail to: 'towehcorina@gmail.com, devopsclass0124@gmail.com',
+                subject: "Deploy Failed - ${currentBuild.fullDisplayName}",
+                body: "The deploy failed.\n\nCheck console output at ${BUILD_URL}"
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 ---
-- name: setup flask environment
+- name: Environment setup
   hosts: all
   become: true
   tasks:
@@ -26,7 +26,7 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-    - name: install necessary packages for dnf (Amazon Linux)
+    - name: Install necessary packages for dnf (Amazon Linux)
       dnf:
         name:
           - python3-pip
@@ -35,7 +35,7 @@
         state: present
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
-    - name: install necessary packages for yum (CentOS)
+    - name: Install necessary packages for yum (CentOS)
       yum:
         name:
           - python3-pip
@@ -44,7 +44,7 @@
         state: present
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
 
-    - name: install necessary packages for apt (Ubuntu)
+    - name: Install necessary packages for apt (Ubuntu)
       apt:
         name:
           - python3-pip
@@ -82,47 +82,48 @@
         group: ubuntu
       when: ansible_pkg_mgr == "apt"
 
-    - name: remove existing flask_dir
+    - name: Remove existing flask_dir
       file:
         path: ~/flask_dir
         state: absent
       ignore_errors: yes
 
-    - name: clone git repository
+    - name: Clone GitHub repository
       git: 
-        repo: https://github.com/ctoweh/flask_web_app.git
+        repo: https://github.com/ctoweh/flask-app.git
         dest: ~/flask_dir/
         version: main
 
-    - name: create virtual environment (Amazon Linux)
+    - name: Create virtual environment
       command: python3 -m venv ~/flask_dir/.myenv
       args:
         chdir: "~/"
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
+      when: (ansible_pkg_mgr == "yum" and ansible_distribution in ["Amazon", "CentOS"]) or (ansible_pkg_mgr == "apt" and ansible_distribution == "Ubuntu")
 
-    - name: create virtual environment (CentOS)
-      command: python3 -m venv ~/flask_dir/.myenv
-      args:
-        chdir: "~/"
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
+    - name: activate the virtual environment
+      shell:
+        cmd: "source {{ app_directory }}/repository/venv/bin/activate && python --version"
+      become_user: yes
 
-    - name: create virtual environment (Ubuntu)
-      command: python3 -m venv ~/flask_dir/.myenv
-      args:
-        chdir: "~/"
-      when: ansible_pkg_mgr == "apt"
-
-    - name: install flask using pip
+    - name: Install Flask within the virtual environment
       pip:
         name: flask
-        executable: ~/flask_dir/.myenv/bin/pip
+        executable: pip3
         state: present
-    
-    - name: start flask app
-      command: /bin/bash -c "export FLASK_APP=~/flask_dir/app.py && ~/flask_dir/.myenv/bin/flask run --host=0.0.0.0 --port=5000 --port=8080 "
 
-    - name: restart flask server
-      command: "pkill -f 'python3 app.py' && nohup python3 ~/flask_dir/.myenv/bin/flask run --host=0.0.0.0 --port=5000 --port=8080 "
-      async: 30
+    - name: Run Flask app
+      command: nohup python3 app.py &
+      async: 60
       poll: 0
-      become: yes
+      args:
+        chdir: "{{ app_directory }}/repository"
+      become_user: centos
+
+    - name: Get the PID of the Flask app
+      shell: "ps aux | grep 'python3 app.py' | grep -v grep | awk '{print $2}'"
+      register: flask_pid
+      ignore_errors: yes
+
+    - name: Stop Flask app after 60 seconds
+      shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
+      ignore_errors: yes
