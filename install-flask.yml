@@ -141,22 +141,29 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-    - name: Activate virtual environment
-      command: source ~/flask-app/venv/bin/activate
-      args:
-        chdir: "~/"
+- name: Activate virtual environment on n2
+  command: source ~/venv/bin/activate
+  args:
+    chdir: "~/"
+  when: ansible_hostname == "n2"
+  delegate_to: "{{ inventory_hostname }}"
 
+- name: Activate virtual environment on other hosts
+  command: source ~/flask-app/venv/bin/activate
+  args:
+    chdir: "~/flask-app/"
+  when: ansible_hostname != "n2"
 
-    - name: Start Flask app
-      shell: |
-         source ~/flask-app/.myenv/bin/activate && \
-         export FLASK_APP=~/flask-app/app.py && \
-         nohup ~/flask-app/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
-      async: 0
-      poll: 0
-   
-   # - name: Stop Flask app after 60 seconds
-   # become: true
-   # shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
-   # async: 0
-   # poll: 0
+- name: Start Flask app
+  shell: |
+     source ~/flask-app/.myenv/bin/activate && \
+     export FLASK_APP=~/flask-app/app.py && \
+     nohup ~/flask-app/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
+  async: 0
+  poll: 0
+
+# - name: Stop Flask app after 60 seconds
+# become: true
+# shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
+# async: 0
+# poll: 0
