@@ -1,36 +1,4 @@
 
-    - name: Create virtual environment (CentOS)
-      command: python3 -m venv /home/centos/flask-app/.myenv
-      args:
-        chdir: "~/"
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
-
-    - name: Create virtual environment (Ubuntu)
-      command: python3 -m venv home/ubuntu/flask-app/.myenv
-      args:
-        chdir: "~/"
-      when: ansible_pkg_mgr == "apt"
-
-    - name: Install Flask using pip (Amazon Linux)
-      pip:
-        name: flask
-        executable: /home/ec2-user/flask-app/venv/bin/pip
-        state: present
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
-
-    - name: Install Flask using pip (CentOS)
-      pip:
-        name: flask
-        executable: /home/centos/flask-app/venv/bin/pip
-        state: present
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
-
-    - name: Install Flask using pip (Ubuntu)
-      pip:
-        name: flask
-        executable: /home/ubuntu/flask-app/venv/bin/pip
-        state: present
-      when: ansible_pkg_mgr == "apt"
 
 
 - name: Activate virtual environment on n2
@@ -52,10 +20,4 @@
         chdir: "~/flask-app/"
 
 
-   - name: Start Flask app
-     shell: >
-        source ~/flask-app/.venv/bin/activate &&
-        export FLASK_APP=~/flask-app/app.py &&
-        ~/flask-app/.venv/bin/flask run --host=0.0.0.0 --port=5000 
-     async: 0
-     poll: 0
+   
