@@ -80,6 +80,14 @@
         dest: "{{ app_directory }}/repository"
         version: main
 
+    - name: Ensure virtual environment directory exists
+      file:
+        path: "{{ app_directory }}/repository/venv"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
     - name: Install virtualenv package
       pip:
         name: virtualenv
