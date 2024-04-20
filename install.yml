@@ -3,14 +3,15 @@
   become: true
   tasks: 
     - name: activate virtual environment
-      command: "~/venv/bin/activate"
+      shell: "source /home/ec2-user/venv/bin/activate"
 
 - name: Activate virtual environment on other hosts
   hosts: all:!n2
   become: true
   tasks:
     - name: activate virtual environment on other hosts
-      command: "~/flask-app/venv/bin/activate"
+      shell: "source /~/flask-app/venv/bin/activate"
+
 
 
 
