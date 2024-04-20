@@ -10,7 +10,7 @@
         name: '*'
         state: latest
       when: ansible_distribution == 'CentOS'
-
+        
     - name: Update package manager cache (Amazon Linux)
       yum:
         name: '*'
@@ -21,7 +21,7 @@
       apt:
         update_cache: yes
       when: ansible_distribution == 'Ubuntu'
-        
+
     - name: Ensure Python and necessary packages are installed (CentOS)
       yum:
         name:
@@ -64,10 +64,12 @@
     - name: Create virtual environment
       command: python3 -m venv /opt/flask-app/venv
       become: yes
+      when: ansible_distribution != 'Amazon'  # Amazon Linux uses different method for virtual environments
 
     - name: Activate virtual environment
-      command: source /opt/flask-app/venv/bin/activate
+      shell: source /opt/flask-app/venv/bin/activate
       become: yes
+      when: ansible_distribution != 'Amazon'
 
     - name: Copy Flask app file
       copy:
