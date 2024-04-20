@@ -1,0 +1,76 @@
+---
+- name: Deploy Flask App
+  hosts: g1
+  become: yes
+  remote_user: root
+  
+  tasks:
+    - name: update apt
+      apt:
+        update_cache: yes
+      become: yes
+        
+    - name: Ensure Python and necessary packages are installed
+      apt:
+        name:
+          - python3-pip
+          - python3-dev
+          - build-essential
+          - python3-venv
+          - python3-flask
+          - git
+        state: present
+      become: yes
+        
+        
+    - name: create directry for virtual environment
+      command: mkdir -p /opt/flask-app
+      
+    - name: create virtual environment
+      command: python3 -m venv /opt/flask-app/venv
+      become: yes
+      
+    - name: activate virtual environment
+      command: /bin/bash -c "source /opt/flask-app/venv/bin/activate"
+      become: yes
+      
+    - name: copy flask app file
+      copy:
+        src: app.py
+        dest: /opt/flask-app/app.py
+        
+    - name: Install Flask dependencies
+      pip:
+        name: flask
+        executable: /opt/flask-app/venv/bin/pip
+        state: present
+      
+    - name: Ensure incoming traffic on port
+      ufw:
+        rule: allow
+        proto: tcp
+        port: 5000
+        comment: "allow incoming traffic to flask app"
+      become: yes
+
+    - name: Ensure incoming traffic on port
+      ufw:
+        rule: allow
+        proto: tcp
+        port: 22
+      become: yes
+        
+    - name: start ufw as a service
+      systemd:
+        name: ufw
+        state: restarted
+      become: yes
+
+    - name: activate virtual env
+      command: /bin/bash -c "source /opt/flask-app/venv/bin/activate"
+
+    - name: run flask app
+      command: /bin/bash -c "export FLASK_APP=/opt/flask-app/app.py && nohup flask run --host=0.0.0.0 --port=5000 > flask_output.log 2>&1 &"
+      async: 0
+      poll: 0
+...
