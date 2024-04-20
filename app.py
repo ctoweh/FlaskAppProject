@@ -1,9 +1,10 @@
-import unittest
-import sys
-from flask import Flask
-sys.path.insert(0, './.myenv/bin/python.10')
+from flask import Flask 
+
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return 'Hello World'
+@app.route("/") 
+def hello():
+    return "I am a Devops Engineer!"
+
+if __name__ == "__main__": 
+    app.run(host='0.0.0.0')
