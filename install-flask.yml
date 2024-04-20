@@ -126,7 +126,7 @@
       command: /bin/bash -c "source ~/flask_dir/.myenv/bin/activate"
 
     - name: Start Flask app
-      command: |
+      shell: |
          source ~/flask_dir/.myenv/bin/activate && \
          export FLASK_APP=~/flask_dir_/app.py && \
          nohup ~/flask_dir/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
