@@ -1,23 +1,17 @@
-
-
-
 - name: Activate virtual environment on n2
   hosts: n2
   become: true
   tasks: 
-    - name: activate virtual environmnent
-      command: source ~/venv/bin/activate
-      args:
-        chdir: "~/"
-  
+    - name: activate virtual environment
+      command: "~/venv/bin/activate"
+
 - name: Activate virtual environment on other hosts
   hosts: all:!n2
   become: true
   tasks:
     - name: activate virtual environment on other hosts
-      command: source ~/flask-app/venv/bin/activate
-      args:
-        chdir: "~/flask-app/"
+      command: "~/flask-app/venv/bin/activate"
+
 
 
    

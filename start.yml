@@ -1,3 +1,4 @@
+---
 - name: Start Flask app
      shell: >
         source ~/flask-app/.venv/bin/activate &&
