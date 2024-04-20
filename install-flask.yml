@@ -105,7 +105,7 @@
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
     - name: create virtual environment (CentOS)
-      command: python3 -m venv ~/flask-appd/.myenv
+      command: python3 -m venv ~/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
