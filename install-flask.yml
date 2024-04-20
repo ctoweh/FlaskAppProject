@@ -162,9 +162,9 @@
 
 
 - name: Start Flask app
-  shell: |
-     source ~/flask-app/.venv/bin/activate && \
-     export FLASK_APP=~/flask-app/app.py && \
-     nohup ~/flask-app/.venv/bin/flask run --host=0.0.0.0 --port=5000 &
+  shell: >
+     source ~/flask-app/.venv/bin/activate &&
+     export FLASK_APP=~/flask-app/app.py &&
+     nohup ~/flask-app/.venv/bin/flask run --host=0.0.0.0 --port=5000 
    async: 0
    poll: 0
