@@ -135,6 +135,6 @@
 
     - name: Stop Flask app after 60 seconds
       become: true
-      shell: "sleep 60 && killall -q -s SIGINT flask"
+      shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
       async: 0
       poll: 0
