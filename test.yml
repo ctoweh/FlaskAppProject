@@ -5,12 +5,46 @@
   remote_user: root
   
   tasks:
-    - name: update apt
+    - name: Update package manager cache (CentOS)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_distribution == 'CentOS'
+
+    - name: Update package manager cache (Amazon Linux)
+      yum:
+        name: '*'
+        state: latest
+      when: ansible_distribution == 'Amazon'
+
+    - name: Update apt cache (Ubuntu)
       apt:
         update_cache: yes
-      become: yes
+      when: ansible_distribution == 'Ubuntu'
         
-    - name: Ensure Python and necessary packages are installed
+    - name: Ensure Python and necessary packages are installed (CentOS)
+      yum:
+        name:
+          - python3-pip
+          - python3-devel
+          - python3-virtualenv
+          - python3-flask
+          - git
+        state: present
+      when: ansible_distribution == 'CentOS'
+
+    - name: Ensure Python and necessary packages are installed (Amazon Linux)
+      yum:
+        name:
+          - python3-pip
+          - python3-devel
+          - python3-virtualenv
+          - python3-flask
+          - git
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Ensure Python and necessary packages are installed (Ubuntu)
       apt:
         name:
           - python3-pip
@@ -20,57 +54,55 @@
           - python3-flask
           - git
         state: present
-      become: yes
+      when: ansible_distribution == 'Ubuntu'
         
-        
-    - name: create directry for virtual environment
-      command: mkdir -p /opt/flask-app
-      
-    - name: create virtual environment
+    - name: Create directory for virtual environment
+      file:
+        path: /opt/flask-app
+        state: directory
+
+    - name: Create virtual environment
       command: python3 -m venv /opt/flask-app/venv
       become: yes
-      
-    - name: activate virtual environment
-      command: /bin/bash -c "source /opt/flask-app/venv/bin/activate"
+
+    - name: Activate virtual environment
+      command: source /opt/flask-app/venv/bin/activate
       become: yes
-      
-    - name: copy flask app file
+
+    - name: Copy Flask app file
       copy:
         src: app.py
         dest: /opt/flask-app/app.py
-        
+
     - name: Install Flask dependencies
       pip:
         name: flask
         executable: /opt/flask-app/venv/bin/pip
         state: present
-      
-    - name: Ensure incoming traffic on port
-      ufw:
-        rule: allow
-        proto: tcp
-        port: 5000
-        comment: "allow incoming traffic to flask app"
+
+    - name: Ensure incoming traffic on port 5000
+      firewalld:
+        port: 5000/tcp
+        permanent: yes
+        state: enabled
+        immediate: yes
       become: yes
 
-    - name: Ensure incoming traffic on port
-      ufw:
-        rule: allow
-        proto: tcp
-        port: 22
+    - name: Ensure incoming SSH traffic
+      firewalld:
+        service: ssh
+        permanent: yes
+        state: enabled
+        immediate: yes
       become: yes
-        
-    - name: start ufw as a service
-      systemd:
-        name: ufw
+
+    - name: Restart firewalld service
+      service:
+        name: firewalld
         state: restarted
       become: yes
 
-    - name: activate virtual env
-      command: /bin/bash -c "source /opt/flask-app/venv/bin/activate"
-
-    - name: run flask app
-      command: /bin/bash -c "export FLASK_APP=/opt/flask-app/app.py && nohup flask run --host=0.0.0.0 --port=5000 > flask_output.log 2>&1 &"
+    - name: Run Flask app
+      command: nohup flask run --host=0.0.0.0 --port=5000 > /opt/flask-app/flask_output.log 2>&1 &
       async: 0
       poll: 0
-...
