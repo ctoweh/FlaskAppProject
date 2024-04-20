@@ -91,9 +91,15 @@
       command: virtualenv -p python3 {{ app_directory }}/repository/venv
       become: yes
 
+    - name: Ensure activate script is executable
+      file:
+        path: "{{ app_directory }}/repository/venv/bin/activate"
+        mode: "0755"
+      become: yes
+
     - name: Activate the virtual environment
       shell:
-        cmd: "{{ app_directory }}/repository/venv/bin/activate"
+        cmd: "source {{ app_directory }}/repository/venv/bin/activate"
       become: yes
 
     - name: Install Flask within the virtual environment
