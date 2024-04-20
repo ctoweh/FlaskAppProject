@@ -141,18 +141,25 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-- name: Activate virtual environment on n2
-  command: source ~/venv/bin/activate
-  args:
-    chdir: "~/"
-  when: ansible_hostname == "n2"
-  delegate_to: "{{ inventory_hostname }}"
 
+- name: Activate virtual environment on n2
+  hosts: n2
+  become: true
+  tasks: 
+    - name: activate virtual environmnent
+      command: source ~/venv/bin/activate
+      args:
+        chdir: "~/"
+  
 - name: Activate virtual environment on other hosts
-  command: source ~/flask-app/venv/bin/activate
-  args:
-    chdir: "~/flask-app/"
-  when: ansible_hostname != "n2"
+  hosts: all:!n2
+  become: true
+  tasks:
+    - name: activate virtual environment on other hosts
+      command: source ~/flask-app/venv/bin/activate
+      args:
+        chdir: "~/flask-app/"
+
 
 - name: Start Flask app
   shell: |
