@@ -14,7 +14,7 @@ pipeline {
             steps {
                 echo 'Deploy'
                 ansiblePlaybook(
-                    playbook: '01.install-flask.yml',
+                    playbook: 'install-flask.yml',
                     inventory: 'hosts.ini'
                 )
             }
