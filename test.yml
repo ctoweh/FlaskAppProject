@@ -69,6 +69,8 @@
     - name: Activate virtual environment
       shell: source /opt/flask-app/venv/bin/activate
       become: yes
+      args:
+        executable: /bin/bash
       when: ansible_distribution != 'Amazon'
 
     - name: Copy Flask app file
