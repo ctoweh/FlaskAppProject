@@ -108,7 +108,7 @@
     - name: activate the virtual environment
       shell:
         cmd: "source {{ app_directory }}/repository/venv/bin/activate && python --version"
-      become_user: yes
+      become_user: true
 
     - name: Install Flask within the virtual environment
       pip:
