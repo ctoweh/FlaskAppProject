@@ -8,6 +8,14 @@
     git_repo_url: https://github.com/ctoweh/flask-app.git
 
   tasks:
+    - name: Ensure flask repository directory exists
+      file:
+        path: "{{ app_directory }}/repository"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0755"
+
     - name: Install Git on Amazon Linux
       dnf:
         name: git
@@ -60,33 +68,6 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-    - name: Create flask directory for Amazon Linux
-      file:
-        path: ~/flask_dir
-        state: directory
-        mode: 0777
-        owner: ec2-user
-        group: ec2-user
-      when: ansible_pkg_mgr == "dnf" and ansible_distribution == "Amazon"
-
-    - name: Create flask directory for CentOS
-      file:
-        path: ~/flask_dir
-        state: directory
-        mode: 0777
-        owner: centos
-        group: centos
-      when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
-
-    - name: Create flask directory for Ubuntu
-      file:
-        path: ~/flask_dir
-        state: directory
-        mode: 0777
-        owner: ubuntu
-        group: ubuntu
-      when: ansible_pkg_mgr == "apt"
-
     - name: Remove existing flask_dir
       file:
         path: ~/flask_dir
@@ -95,8 +76,8 @@
 
     - name: Clone GitHub repository
       git: 
-        repo: https://github.com/ctoweh/flask-app.git
-        dest: ~/flask_dir/
+        repo: "{{ git_repo_url }}"
+        dest: "{{ app_directory }}/repository"
         version: main
 
     - name: Install virtualenv package
@@ -105,20 +86,17 @@
         executable: pip3
         state: present
       become: yes
-      become_user: "{{ ansible_user }}"
 
     - name: Create a virtual environment
       command: virtualenv -p python3 venv
       args:
         chdir: "{{ app_directory }}/repository"
       become: yes
-      become_user: "{{ ansible_user }}"
 
     - name: Activate the virtual environment
       shell:
         cmd: "source {{ app_directory }}/repository/venv/bin/activate && python --version"
       become: yes
-      become_user: "{{ ansible_user }}"
 
     - name: Install Flask within the virtual environment
       pip:
@@ -143,4 +121,3 @@
       shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
       ignore_errors: yes
 
-...
