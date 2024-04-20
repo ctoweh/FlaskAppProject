@@ -99,7 +99,7 @@
     - name: Install Flask within the virtual environment
       pip:
         name: flask
-        executable: {{ app_directory }}/repository/venv/bin/pip
+        executable: "{{ app_directory }}/repository/venv/bin/pip"
         state: present
       become: yes
 
