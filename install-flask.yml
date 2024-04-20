@@ -2,26 +2,23 @@
 - name: Environment setup
   hosts: all
   become: true
-
-  vars:
-    app_directory: /home/centos/flask-app
-    git_repo_url: https://github.com/ctoweh/flask-app.git
+  gather_facts: true
 
   tasks:
     - name: Ensure flask repository directory exists
       file:
-        path: "{{ app_directory }}/repository"
+        path: "/home/centos/flask-app/repository"
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: "centos"
+        group: "centos"
         mode: "0755"
 
     - name: Ensure virtual environment directory exists
       file:
-        path: "{{ app_directory }}/repository/venv"
+        path: "/home/centos/flask-app/repository/venv"
         state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
+        owner: "centos"
+        group: "centos"
         mode: "0755"
 
     - name: Install Git on CentOS
@@ -37,46 +34,46 @@
       when: ansible_pkg_mgr == "apt"
 
     - name: Clone GitHub repository
-      git: 
-        repo: "{{ git_repo_url }}"
-        dest: "{{ app_directory }}/repository"
+      git:
+        repo: "https://github.com/ctoweh/flask-app.git"
+        dest: "/home/centos/flask-app/repository"
         version: main
 
     - name: Install virtualenv package
       pip:
         name: virtualenv
-        executable: pip3
+        executable: /usr/bin/pip3
         state: present
-      become: yes
+      become: true
 
     - name: Create a virtual environment
-      command: virtualenv -p python3 {{ app_directory }}/repository/venv
-      become: yes
+      command: virtualenv -p python3 /home/centos/flask-app/repository/venv
+      become: true
 
     - name: Activate the virtual environment
       shell:
-        cmd: "source {{ app_directory }}/repository/venv/bin/activate"
+        cmd: "source /home/centos/flask-app/repository/venv/bin/activate"
         executable: /bin/bash
-      become: yes
+      become: true
 
     - name: Install Flask within the virtual environment
       pip:
         name: flask
-        executable: "{{ app_directory }}/repository/venv/bin/pip"
+        executable: "/home/centos/flask-app/repository/venv/bin/pip"
         state: present
-      become: yes
+      become: true
 
     - name: Run Flask app
-      command: nohup {{ app_directory }}/repository/venv/bin/python3 {{ app_directory }}/repository/app.py &
+      command: nohup /home/centos/flask-app/repository/venv/bin/python3 /home/centos/flask-app/repository/app.py &
       async: 60
       poll: 0
       become_user: "{{ ansible_user }}"
 
     - name: Get the PID of the Flask app
-      shell: "ps aux | grep 'python3 {{ app_directory }}/repository/app.py' | grep -v grep | awk '{print $2}'"
+      shell: "ps aux | grep 'python3 /home/centos/flask-app/repository/app.py' | grep -v grep | awk '{print $2}'"
       register: flask_pid
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Stop Flask app after 60 seconds
       shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
-      ignore_errors: yes
+      ignore_errors: true
