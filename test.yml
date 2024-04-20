@@ -66,6 +66,11 @@
       become: yes
       when: ansible_distribution != 'Amazon'
 
+    - name: Activate virtual environment
+      shell: source /opt/flask-app/venv/bin/activate
+      become: yes
+      when: ansible_distribution != 'Amazon'
+
     - name: Copy Flask app file
       copy:
         src: app.py
@@ -77,27 +82,13 @@
         executable: /opt/flask-app/venv/bin/pip
         state: present
 
-    - name: Ensure incoming traffic on port 5000
-      firewalld:
-        port: 5000/tcp
-        permanent: yes
-        state: enabled
-        immediate: yes
+    - name: Open port 5000 on the firewall (Ubuntu)
+      ufw:
+        rule: allow
+        port: 5000
+        proto: tcp
       become: yes
-
-    - name: Ensure incoming SSH traffic
-      firewalld:
-        service: ssh
-        permanent: yes
-        state: enabled
-        immediate: yes
-      become: yes
-
-    - name: Restart firewalld service
-      service:
-        name: firewalld
-        state: restarted
-      become: yes
+      when: ansible_distribution == 'Ubuntu'
 
     - name: Run Flask app
       command: >
