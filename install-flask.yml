@@ -88,36 +88,32 @@
       become: yes
 
     - name: Create a virtual environment
-      command: virtualenv -p python3 venv
-      args:
-        chdir: "{{ app_directory }}/repository"
+      command: virtualenv -p python3 {{ app_directory }}/repository/venv
       become: yes
 
     - name: Activate the virtual environment
       shell:
-        cmd: "source {{ app_directory }}/repository/venv/bin/activate && python --version"
+        cmd: "{{ app_directory }}/repository/venv/bin/activate"
       become: yes
 
     - name: Install Flask within the virtual environment
       pip:
         name: flask
-        executable: pip3
+        executable: {{ app_directory }}/repository/venv/bin/pip
         state: present
+      become: yes
 
     - name: Run Flask app
-      command: nohup python3 app.py &
+      command: nohup {{ app_directory }}/repository/venv/bin/python3 {{ app_directory }}/repository/app.py &
       async: 60
       poll: 0
-      args:
-        chdir: "{{ app_directory }}/repository"
       become_user: "{{ ansible_user }}"
 
     - name: Get the PID of the Flask app
-      shell: "ps aux | grep 'python3 app.py' | grep -v grep | awk '{print $2}'"
+      shell: "ps aux | grep 'python3 {{ app_directory }}/repository/app.py' | grep -v grep | awk '{print $2}'"
       register: flask_pid
       ignore_errors: yes
 
     - name: Stop Flask app after 60 seconds
       shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
       ignore_errors: yes
-
