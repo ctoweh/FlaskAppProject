@@ -61,7 +61,7 @@
 
     - name: Create flask directory for Amazon Linux
       file:
-        path: ~/flask_dir
+        path: ~/flask-app
         state: directory
         mode: 0777
         owner: ec2-user
@@ -70,7 +70,7 @@
 
     - name: Create flask directory for CentOS
       file:
-        path: ~/flask_dir
+        path: ~/flask-app
         state: directory
         mode: 0777
         owner: centos
@@ -79,39 +79,39 @@
 
     - name: Create flask directory for Ubuntu
       file:
-        path: ~/flask_dir
+        path: ~/flask-app
         state: directory
         mode: 0777
         owner: ubuntu
         group: ubuntu
       when: ansible_pkg_mgr == "apt"
 
-    - name: remove existing flask_dir
+    - name: remove existing flask-app
       file:
-        path: ~/flask_dir
+        path: ~/flask-app
         state: absent
       ignore_errors: yes
 
     - name: clone git repository
       git: 
         repo: https://github.com/ctoweh/flask-app.git
-        dest: ~/flask_dir/
+        dest: ~/flask-app/
         version: main
 
     - name: create virtual environment (Amazon Linux)
-      command: python3 -m venv ~/flask_dir/.myenv
+      command: python3 -m venv ~/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
     - name: create virtual environment (CentOS)
-      command: python3 -m venv ~/flask_dir/.myenv
+      command: python3 -m venv ~/flask-appd/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
 
     - name: create virtual environment (Ubuntu)
-      command: python3 -m venv ~/flask_dir/.myenv
+      command: python3 -m venv ~/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "apt"
@@ -119,16 +119,16 @@
     - name: install flask using pip
       pip:
         name: flask
-        executable: ~/flask_dir/.myenv/bin/pip
+        executable: ~/flask-app/.myenv/bin/pip
         state: present
     
     - name: Activate virtual environment
-      command: /bin/bash -c "source ~/flask_dir/.myenv/bin/activate"
+      command: /bin/bash -c "source ~/flask-app/.myenv/bin/activate"
 
     - name: Start Flask app
       shell: |
-         source ~/flask_dir/.myenv/bin/activate && \
-         export FLASK_APP=~/flask_dir_/app.py && \
-         nohup ~/flask_dir/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
+         source ~/flask-app/.myenv/bin/activate && \
+         export FLASK_APP=~/flask-app/app.py && \
+         nohup ~/flask-app/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
       async: 0
       poll: 0
