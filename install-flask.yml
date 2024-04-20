@@ -4,8 +4,8 @@
   become: true
 
   vars:
-    app_directory: /home/centos/flask-app
-    app_repo: https://github.com/ctoweh/flask-app.git
+    flask_app_directory: /home/centos/flask-app
+    flask_app_repo: https://github.com/ctoweh/flask-app.git
 
   tasks:
     - name: Install Git on Amazon Linux
@@ -99,36 +99,52 @@
         dest: ~/flask_dir/
         version: main
 
-    - name: Create virtual environment
-      command: python3 -m venv ~/flask_dir/.myenv
-      args:
-        chdir: "~/"
-      when: (ansible_pkg_mgr == "yum" and ansible_distribution in ["Amazon", "CentOS"]) or (ansible_pkg_mgr == "apt" and ansible_distribution == "Ubuntu")
-
-    - name: activate the virtual environment
-      shell:
-        cmd: "/home/centos/flask-app/repository/venv/bin/activate && python --version"
-      become_user: centos
-
-    - name: Install Flask within the virtual environment
+    - name: Install virtualenv
       pip:
-        name: flask
+        name: virtualenv
         executable: pip3
         state: present
 
-    - name: Run Flask app
-      command: nohup python3 app.py &
-      async: 60
-      poll: 0
+    - name: Create virtual environment
+      command: python3 -m venv venv
       args:
-        chdir: "{{ app_directory }}/repository"
-      become_user: centos
+        chdir: "{{ flask_app_directory }}"
+      environment:
+        PATH: "{{ flask_app_directory }}/venv/bin:{{ ansible_env.PATH }}"
 
-    - name: Get the PID of the Flask app
-      shell: "ps aux | grep 'python3 app.py' | grep -v grep | awk '{print $2}'"
-      register: flask_pid
-      ignore_errors: yes
+    - name: Activate virtual environment
+      command: "/bin/bash -c 'source {{ flask_app_directory }}/venv/bin/activate'"
+      become: yes
 
-    - name: Stop Flask app after 60 seconds
-      shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
-      ignore_errors: yes
+    - name: Install Flask
+      pip:
+        name: Flask
+        executable: pip3
+        state: present
+
+    - name: Install Gunicorn
+      pip:
+        name: gunicorn
+        executable: pip3
+        state: present
+
+    - name: Install Firewall
+      yum:
+        name: firewalld
+        state: present
+      when: ansible_distribution == 'CentOS'
+
+    - name: Configure Firewall
+      firewalld:
+        port: 5000/tcp
+        permanent: yes
+        state: enabled
+      notify:
+        - restart firewalld
+
+    - name: Restart firewalld
+      systemd:
+        name: firewalld
+        state: restarted
+      become: yes
+...
