@@ -59,7 +59,6 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-
     - name: Create flask directory for Amazon Linux
       file:
         path: ~/flask-app
@@ -87,7 +86,6 @@
         group: ubuntu
       when: ansible_pkg_mgr == "apt"
 
-
     - name: Remove existing flask-app
       file:
         path: ~/flask-app
@@ -103,7 +101,6 @@
     - name: Debug information
       debug:
         msg: "ansible_pkg_mgr: {{ ansible_pkg_mgr }}, ansible_distribution: {{ ansible_distribution }}"
-
 
     - name: Create virtual environment (Amazon Linux)
       command: python3 -m venv /home/ec2-user/flask-app/.myenv
@@ -123,18 +120,29 @@
         chdir: "~/"
       when: ansible_pkg_mgr == "apt"
 
-
-
-    - name: Install flask using pip
+    - name: Install Flask using pip (Amazon Linux)
       pip:
         name: flask
-        executable: ~/flask-app/.myenv/bin/pip
+        executable: /home/ec2-user/flask-app/venv/bin/pip
         state: present
-      when: ansible_pkg_mgr == "yum" or ansible_pkg_mgr == "dnf" or ansible_pkg_mgr == "apt"
+      when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
-    
+    - name: Install Flask using pip (CentOS)
+      pip:
+        name: flask
+        executable: /home/centos/flask-app/venv/bin/pip
+        state: present
+      when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
+
+    - name: Install Flask using pip (Ubuntu)
+      pip:
+        name: flask
+        executable: /home/ubuntu/flask-app/venv/bin/pip
+        state: present
+      when: ansible_pkg_mgr == "apt"
+
     - name: Activate virtual environment
-      command: source ~/flask-app/.myenv/bin/activate
+      command: source ~/flask-app/venv/bin/activate
       args:
         chdir: "~/"
 
@@ -146,9 +154,9 @@
          nohup ~/flask-app/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
       async: 0
       poll: 0
-
-    # - name: Stop Flask app after 60 seconds
-    # become: true
-    # shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
-    # async: 0
-    # poll: 0
+   
+   # - name: Stop Flask app after 60 seconds
+   # become: true
+   # shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
+   # async: 0
+   # poll: 0
