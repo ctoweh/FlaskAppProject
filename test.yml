@@ -64,11 +64,6 @@
     - name: Create virtual environment
       command: python3 -m venv /opt/flask-app/venv
       become: yes
-      when: ansible_distribution != 'Amazon'  # Amazon Linux uses different method for virtual environments
-
-    - name: Activate virtual environment
-      shell: source /opt/flask-app/venv/bin/activate
-      become: yes
       when: ansible_distribution != 'Amazon'
 
     - name: Copy Flask app file
@@ -105,6 +100,7 @@
       become: yes
 
     - name: Run Flask app
-      command: nohup flask run --host=0.0.0.0 --port=5000 > /opt/flask-app/flask_output.log 2>&1 &
+      command: >
+        /opt/flask-app/venv/bin/python /opt/flask-app/app.py &
       async: 0
       poll: 0
