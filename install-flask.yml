@@ -21,43 +21,48 @@
         group: "{{ ansible_user }}"
         mode: "0755"
 
-    - name: Install Git
-      package:
+    - name: Install Git on CentOS
+      ansible.builtin.command: "sudo yum install -y git"
+      when: ansible_pkg_mgr == 'yum' and ansible_distribution == 'Amazon'
+
+    - name: Install Git on Ubuntu
+      ansible.builtin.package:
         name: git
         state: present
+      when: ansible_pkg_mgr == 'apt'
 
     - name: Clone GitHub repository
-      git:
+      ansible.builtin.git:
         repo: "https://github.com/ctoweh/flask-app.git"
         dest: "/home/{{ ansible_user }}/flask-app/repository"
         version: main
 
     - name: Install virtualenv package
-      pip:
+      ansible.builtin.pip:
         name: virtualenv
         executable: /usr/bin/pip3
         state: present
 
     - name: Create a virtual environment
-      command: virtualenv -p python3 /home/{{ ansible_user }}/flask-app/repository/venv
+      ansible.builtin.command: virtualenv -p python3 /home/{{ ansible_user }}/flask-app/repository/venv
 
     - name: Install Flask within the virtual environment
-      pip:
+      ansible.builtin.pip:
         name: flask
         executable: "/home/{{ ansible_user }}/flask-app/repository/venv/bin/pip"
         state: present
 
     - name: Run Flask app
-      command: "/home/{{ ansible_user }}/flask-app/repository/venv/bin/python3 /home/{{ ansible_user }}/flask-app/repository/app.py &"
+      ansible.builtin.command: "/home/{{ ansible_user }}/flask-app/repository/venv/bin/python3 /home/{{ ansible_user }}/flask-app/repository/app.py &"
       async: 60
       poll: 0
       become_user: "{{ ansible_user }}"
 
     - name: Get the PID of the Flask app
-      shell: "ps aux | grep 'python3 /home/{{ ansible_user }}/flask-app/repository/app.py' | grep -v grep | awk '{print $2}'"
+      ansible.builtin.shell: "ps aux | grep 'python3 /home/{{ ansible_user }}/flask-app/repository/app.py' | grep -v grep | awk '{print $2}'"
       register: flask_pid
       ignore_errors: true
 
     - name: Stop Flask app after 60 seconds
-      shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
+      ansible.builtin.shell: "sleep 60 && kill -TERM {{ flask_pid.stdout }}"
       ignore_errors: true
