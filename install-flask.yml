@@ -99,7 +99,7 @@
 
     - name: Activate the virtual environment
       shell:
-        cmd: "{{ app_directory }}/repository/venv/bin/activate"
+        cmd: "source {{ app_directory }}/repository/venv/bin/activate"
         executable: /bin/bash
       become: yes
 
