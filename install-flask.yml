@@ -30,7 +30,7 @@
         state: present
       when: ansible_pkg_mgr == "apt"
 
-    - name: install necessary packages for dnf (Amazon Linux)
+    - name: Install dependencies for dnf (Amazon Linux)
       dnf:
         name:
           - python3-pip
@@ -39,7 +39,7 @@
         state: present
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
-    - name: install necessary packages for yum (CentOS)
+    - name: Install dependencies for yum (CentOS)
       yum:
         name:
           - python3-pip
@@ -48,7 +48,7 @@
         state: present
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
 
-    - name: install necessary packages for apt (Ubuntu)
+    - name: Install dependencies for apt (Ubuntu)
       apt:
         name:
           - python3-pip
@@ -58,6 +58,7 @@
           - ufw
         state: present
       when: ansible_pkg_mgr == "apt"
+
 
     - name: Create flask directory for Amazon Linux
       file:
@@ -86,7 +87,8 @@
         group: ubuntu
       when: ansible_pkg_mgr == "apt"
 
-    - name: remove existing flask-app
+
+    - name: Remove existing flask-app
       file:
         path: ~/flask-app
         state: absent
@@ -98,25 +100,28 @@
         dest: ~/flask-app/
         version: main
 
-    - name: create virtual environment (Amazon Linux)
-      command: python3 -m venv ~/flask-app/.myenv
+
+    - name: Create virtual environment (Amazon Linux)
+      command: python3 -m venv /home/ec2-user/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
-    - name: create virtual environment (CentOS)
-      command: python3 -m venv ~/flask-app/.myenv
+    - name: Create virtual environment (CentOS)
+      command: python3 -m venv /home/centos/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "CentOS"
 
-    - name: create virtual environment (Ubuntu)
-      command: python3 -m venv ~/flask-app/.myenv
+    - name: Create virtual environment (Ubuntu)
+      command: python3 -m venv home/ubuntu/flask-app/.myenv
       args:
         chdir: "~/"
       when: ansible_pkg_mgr == "apt"
 
-    - name: install flask using pip
+
+
+    - name: Install flask using pip
       pip:
         name: flask
         executable: ~/flask-app/.myenv/bin/pip
