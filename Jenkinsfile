@@ -22,20 +22,10 @@ pipeline {
     }
     post {
         success {
-            script {
-                // Send email for successful deploy
-                mail to: 'towehcorina@gmail.com, devopsclass0124@gmail.com',
-                subject: "Deploy Successful - ${currentBuild.fullDisplayName}",
-                body: "The deploy was successful.\n\nCheck console output at ${BUILD_URL}"
-            }
+            echo 'Flask app deployment successful!'
         }
         failure {
-            script {
-                // Send email for failed deploy
-                mail to: 'towehcorina@gmail.com, devopsclass0124@gmail.com',
-                subject: "Deploy Failed - ${currentBuild.fullDisplayName}",
-                body: "The deploy failed.\n\nCheck console output at ${BUILD_URL}"
+            echo 'Flask app deployment failed!' 
             }
         }
     }
-}
