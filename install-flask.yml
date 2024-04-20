@@ -100,6 +100,10 @@
         dest: ~/flask-app/
         version: main
 
+    - name: Debug information
+      debug:
+        msg: "ansible_pkg_mgr: {{ ansible_pkg_mgr }}, ansible_distribution: {{ ansible_distribution }}"
+
 
     - name: Create virtual environment (Amazon Linux)
       command: python3 -m venv /home/ec2-user/flask-app/.myenv
