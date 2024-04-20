@@ -18,7 +18,7 @@
   become: true
   tasks:
     - name: activate virtual environment
-      command: "source /home/ubuntu/flask-app/venv/bin/activate"
+      command: "source /home/ubuntu/venv/bin/activate"
 
 
 
