@@ -107,10 +107,8 @@
 
     - name: activate the virtual environment
       shell:
-        cmd: "source {{ app_directory }}/repository/venv/bin/activate && python --version"
+        cmd: "/home/centos/flask-app/repository/venv/bin/activate && python --version"
       become_user: centos
-
-
 
     - name: Install Flask within the virtual environment
       pip:
