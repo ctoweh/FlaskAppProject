@@ -163,14 +163,9 @@
 
 - name: Start Flask app
   shell: |
-     source ~/flask-app/.myenv/bin/activate && \
+     source ~/flask-app/.venv/bin/activate && \
      export FLASK_APP=~/flask-app/app.py && \
-     nohup ~/flask-app/.myenv/bin/flask run --host=0.0.0.0 --port=5000 &
+     nohup ~/flask-app/.venv/bin/flask run --host=0.0.0.0 --port=5000 &
   async: 0
   poll: 0
 
-# - name: Stop Flask app after 60 seconds
-# become: true
-# shell: "sleep 60 && ps aux | grep 'flask run' | grep -v grep | awk '{print $2}' | xargs kill -15 || true"
-# async: 0
-# poll: 0
