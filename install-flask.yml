@@ -130,7 +130,10 @@
 
     
     - name: Activate virtual environment
-      command: /bin/bash -c "source ~/flask-app/.myenv/bin/activate"
+      command: source ~/flask-app/.myenv/bin/activate
+      args:
+        chdir: "~/"
+
 
     - name: Start Flask app
       shell: |
