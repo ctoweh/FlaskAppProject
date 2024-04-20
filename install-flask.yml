@@ -2,6 +2,11 @@
 - name: Environment setup
   hosts: all
   become: true
+
+  vars:
+    flask_app_directory: /home/centos/flask-app
+    flask_app_repo: https://github.com/ctoweh/flask-app.git
+
   tasks:
     - name: Install Git on Amazon Linux
       dnf:
