@@ -49,13 +49,8 @@
         state: present
       become: yes
 
-    - name: Change to repository directory
-      become: yes
-      become_user: "{{ ansible_user }}"
-      shell: cd {{ app_directory }}/repository
-
     - name: Create a virtual environment
-      command: virtualenv -p python3 venv
+      command: virtualenv -p python3 {{ app_directory }}/repository/venv
       become: yes
 
     - name: Activate the virtual environment
