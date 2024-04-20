@@ -99,7 +99,8 @@
 
     - name: Activate the virtual environment
       shell:
-        cmd: "source {{ app_directory }}/repository/venv/bin/activate"
+        cmd: "{{ app_directory }}/repository/venv/bin/activate"
+        executable: /bin/bash
       become: yes
 
     - name: Install Flask within the virtual environment
