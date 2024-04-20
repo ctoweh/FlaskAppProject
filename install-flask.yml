@@ -135,6 +135,6 @@
 
     - name: Stop Flask app after 60 seconds
       become: true
-      shell: "sleep 60 && pkill -f 'flask-run' "
+      shell: "sleep 60 && pkill -f 'flask-run' || true"
       async: 0
       poll: 0
