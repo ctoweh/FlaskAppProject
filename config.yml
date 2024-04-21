@@ -3,7 +3,7 @@
   become: true
 
   vars:
-    flask_app_dir: /home/centos/flask-app
+    app_dir: /home/centos/flask-app
     git_hub_repo: https://github.com/ctoweh/flask-app.git 
 
   tasks:

@@ -20,6 +20,12 @@
     - name: activate virtual environment
       command: /home/ubuntu/flask-app/venv/bin/activate
 
+- name: Run flask app
+  command: python {{ app_directory }}/repository/app.py &
+  async: 60
+  poll: 0
+  
+
 
 
 
