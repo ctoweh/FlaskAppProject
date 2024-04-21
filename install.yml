@@ -28,7 +28,7 @@
     
   tasks:
     - name: run flask app
-      command: python {{ app_directory }}/repository/app.py &
+      command: python {{ app_dir }}/repository/app.py &
       async: 60
       poll: 0
   
