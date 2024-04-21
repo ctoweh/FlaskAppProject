@@ -1,2 +1,63 @@
 ---
-# tasks file for ubuntu_flask_app
+- name: Install necessary packages for Ubuntu
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python3
+    - python3-pip
+    - build-essential
+    - git 
+    # Add any other packages specific to your application
+  become: yes
+
+
+
+- name: Create a virtual environment for Flask app
+  command: |
+    python3 -m venv /home/ubuntu/flask-app
+  args:
+    creates: /home/ubuntu/flask-app
+  become: yes
+
+- name: Activate the virtual environment
+  command: |
+    source /home/ubuntu/flask-app/bin/activate
+  args:
+    executable: bash
+  become: yes
+
+- name: Install Flask using pip
+  pip:
+    name: flask
+    executable: /home/ubuntu/flask-app/bin/pip
+  become: yes
+
+
+
+- name: Create a systemd service file for Flask app
+  template:
+    src: flask_app.service.j2
+    dest: /etc/systemd/system/flask_app.service
+  notify: Restart Flask App
+  become: yes
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Start Flask app service
+  systemd:
+    name: flask_app
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Ensure Flask app is stopped
+  systemd:
+    name: flask_app
+    state: stopped
+  become: yes
+  when: ansible_verbosity != 0
+
