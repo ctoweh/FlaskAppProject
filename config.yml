@@ -124,7 +124,7 @@
     - name: Install Flask using pip (Amazon Linux)
       pip:
         name: flask
-        executable: /home/ec2-user/venv/bin/pip
+        executable: /home/ec2-user/flask-app/venv/bin/pip
         state: present
       when: ansible_pkg_mgr == "yum" and ansible_distribution == "Amazon"
 
