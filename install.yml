@@ -22,6 +22,10 @@
 
 - name: Run flask app
   hosts: n1
+
+  vars:
+    app_dir: /home/centos/flask-app
+    
   tasks:
     - name: run flask app
       command: python {{ app_directory }}/repository/app.py &
