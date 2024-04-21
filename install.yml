@@ -11,14 +11,14 @@
   become: true
   tasks: 
     - name: activate virtual environment
-      shell: "source /home/ec2-user/venv/bin/activate"
+      shell: "source /home/ec2-user/flask-app/venv/bin/activate"
 
 - name: Activate virtual environment on n3
   hosts: n3
   become: true
   tasks:
     - name: activate virtual environment
-      command: /home/ubuntu/venv/bin/activate
+      command: /home/ubuntu/flask-app/venv/bin/activate
 
 
 
